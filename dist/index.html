@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Doctor Portal</title>
+  <meta name="description" content="Doctor call queue and professional call receipt portal.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Open+Sans:wght@400;500;600;700&display=swap">
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Doctor workspace">
+      <div class="brand">
+        <img class="brand-image" src="/logo.webp" alt="Body & Soul Health Center">
+        <div>
+          <strong>Body & Soul</strong>
+          <small>Doctor Portal</small>
+        </div>
+      </div>
+
+      <nav class="nav-list" aria-label="Portal sections">
+        <a class="active" href="#queue">Patient Queue</a>
+        <a href="#profile">Doctor Details</a>
+      </nav>
+
+      <section class="doctor-card" id="profile">
+        <p class="eyebrow">Attending Doctor</p>
+        <h2 id="doctorName">Dr. Shabana Haxton</h2>
+        <p id="doctorSpecialty">Consultant Physician</p>
+        <p id="doctorRegistration">PMDC Reg. 18472-D</p>
+        <p id="doctorClinic">Body & Soul Health Center</p>
+        <button id="editProfile" type="button">Edit Profile</button>
+      </section>
+      <form id="loginForm" class="login-form" hidden>
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">Sign In</button>
+      </form>
+      <button id="signOut" type="button" class="ghost" hidden>Sign Out</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Today&apos;s call list</p>
+          <h1>Doctor Portal</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="callNext" type="button">Call Next Patient</button>
+        </div>
+      </header>
+      <!-- <p id="appMessage" role="status" aria-live="polite"></p> -->
+
+      <section class="metrics" aria-label="Queue summary">
+        <article><span id="pendingCount">0</span><p>Pending</p></article>
+        <article><span id="calledCount">0</span><p>Called</p></article>
+        <article><span id="receiptCount">0</span><p>Receipts Ready</p></article>
+      </section>
+
+      <section class="workspace">
+        <div class="panel queue-panel" id="queue">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Call workflow</p>
+              <h2>Patient List</h2>
+            </div>
+            <span class="chip" id="activeQueueLabel">Ready</span>
+          </div>
+
+          <div class="patient-access" id="patientAccess" role="status">
+            <span id="patientAccessMessage"></span>
+            <a id="patientSignIn" href="#loginForm" hidden>Sign In</a>
+            <button id="retryConnection" type="button" hidden>Retry Connection</button>
+          </div>
+          <p id="queueMessage" role="status" aria-live="polite" hidden></p>
+          <form class="patient-form" id="patientForm">
+            <label>Name<input id="patientNameInput" name="patientName" type="text" autocomplete="off" required></label>
+            <label>Description<input id="patientReasonInput" name="patientReason" list="callDescriptions" required></label>
+            <label>Date of Birth<input name="date_of_birth" type="date"></label>
+            <label>Facility<input name="facility" type="text"></label>
+            <label>Appointment Time<input name="appointment_time" type="text" placeholder="3:00 PM"></label>
+            <label>Customer Person Name<input name="contact_person_name" type="text"></label>
+            <label>Contact Details<input id="patientPhoneInput" name="patientPhone" type="text" required></label>
+            <label>Appointment Date<input name="scheduled_date" type="date"></label>
+            <label class="patient-notes">Notes<textarea name="notes" rows="2" maxlength="4000"></textarea></label>
+            <button type="submit">Add Patient</button>
+          </form>
+          <datalist id="callDescriptions">
+            <option value="Brain mapping"></option>
+            <option value="Cognitive assessment"></option>
+            <option value="Follow-up consultation"></option>
+            <option value="Lab result review"></option>
+            <option value="Medication check-in"></option>
+            <option value="Wellness plan update"></option>
+          </datalist>
+
+          <form class="bulk-import" id="bulkImportForm">
+            <div class="bulk-import-header">
+              <div>
+                <p class="eyebrow">Bulk import</p>
+                <h3>Import Patients</h3>
+              </div>
+              <span id="bulkImportCount" class="chip">No patients detected</span>
+            </div>
+            <label class="bulk-import-file" for="bulkImportFile">CSV file<input id="bulkImportFile" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values"></label>
+            <label for="bulkPatientInput">Patient data</label>
+            <textarea id="bulkPatientInput" rows="7" spellcheck="false" placeholder="Name, Description, Date of Birth, Facility, Appointment Time, Contact Person Name, Contact Details, Notes"></textarea>
+            <p id="bulkImportMessage" role="alert" hidden></p>
+            <div class="bulk-import-actions">
+              <button id="bulkImportButton" type="submit" disabled>Import Patients</button>
+              <button id="clearBulkImport" class="ghost" type="button">Clear</button>
+            </div>
+            <div class="patient-list bulk-import-preview" id="bulkImportPreview" tabindex="0" aria-label="Patient import preview" aria-live="polite"></div>
+          </form>
+
+          <div class="queue-toolbar">
+            <input id="patientSearch" type="search" placeholder="Search patient records" aria-label="Search patient records">
+            <select id="statusFilter" aria-label="Filter patient status">
+              <option value="all">All patients</option>
+              <option value="pending">Pending</option>
+              <option value="called">Called</option>
+              <option value="message">Left message</option>
+            </select>
+            <span id="resultCount" role="status"></span>
+          </div>
+          <div class="patient-list" id="patientList" tabindex="0" aria-label="Patient records" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <dialog id="receiptDialog" class="receipt-dialog" aria-labelledby="receiptDialogTitle">
+        <section class="receipt-panel" id="receipt">
+          <div class="profile-dialog-header">
+            <div>
+              <p class="eyebrow">Professional proof</p>
+              <h2 id="receiptDialogTitle">Call Receipt</h2>
+            </div>
+            <button id="closeReceipt" class="profile-close" type="button" aria-label="Close receipt" title="Close">&times;</button>
+          </div>
+          <p id="receiptStatus" role="status">Select a completed call</p>
+          <p id="receiptMessage" role="alert" hidden></p>
+
+          <div class="receipt-preview" id="receiptPreview">
+            <div class="receipt-top">
+              <img class="receipt-brand-image" src="/logo.webp" alt="Body & Soul Health Center">
+              <div>
+                <strong>Body & Soul Health Center</strong>
+                <p>Integrated care and patient support</p>
+              </div>
+            </div>
+
+            <div class="receipt-title">
+              <div>
+                <p class="eyebrow">Call Receipt</p>
+                <h3 id="receiptNumber">No completed call selected</h3>
+              </div>
+              <span id="receiptBadge">Pending</span>
+            </div>
+
+            <dl class="receipt-grid">
+              <div><dt>Doctor</dt><dd id="receiptDoctor">Dr. Shabana Haxton</dd></div>
+              <div><dt>Specialty</dt><dd id="receiptSpecialty">Consultant Physician</dd></div>
+              <div><dt>Patient</dt><dd id="receiptPatient">Select patient</dd></div>
+              <div><dt>Contact Details</dt><dd id="receiptPhone">--</dd></div>
+              <div><dt>Date of Birth</dt><dd id="receiptBirthDate">--</dd></div>
+              <div><dt>Facility</dt><dd id="receiptFacility">--</dd></div>
+              <div><dt>Appointment Time</dt><dd id="receiptAppointmentTime">--</dd></div>
+              <div><dt>Customer Person Name</dt><dd id="receiptContactPerson">--</dd></div>
+              <div><dt>Call Date</dt><dd id="receiptDate">--</dd></div>
+              <div><dt>Call Time</dt><dd id="receiptTime">--</dd></div>
+              <div><dt>Purpose</dt><dd id="receiptReason">--</dd></div>
+              <div><dt>Outcome</dt><dd id="receiptOutcome">Awaiting completed call</dd></div>
+              <div><dt>Scheduled Date</dt><dd id="receiptScheduledDate">--</dd></div>
+              <div><dt>Notes</dt><dd id="receiptNotes">--</dd></div>
+            </dl>
+
+            <div class="receipt-note">
+              <strong>Summary</strong>
+              <p id="receiptSummary">Complete a call to generate a downloadable proof of contact with patient details, doctor information, and a timestamped receipt number.</p>
+            </div>
+
+            <div class="receipt-signature">
+              <span>Digitally generated receipt</span>
+              <strong>Body & Soul Health Center</strong>
+            </div>
+          </div>
+
+          <div class="receipt-actions">
+            <button id="downloadReceipt" type="button" disabled>Download PDF</button>
+            <button class="ghost" id="shareReceipt" type="button" disabled>Share Receipt</button>
+            <a id="receiptFile" hidden target="_blank" rel="noopener">Open PDF</a>
+          </div>
+        </section>
+  </dialog>
+  <dialog id="patientDialog" class="profile-dialog" aria-labelledby="patientDialogTitle">
+    <header class="profile-dialog-header">
+      <h2 id="patientDialogTitle">Patient Details</h2>
+      <button id="closePatient" class="profile-close" type="button" aria-label="Close patient details" title="Close">&times;</button>
+    </header>
+    <form id="editPatientForm">
+      <div class="profile-fields">
+        <label>Name<input name="name" required></label>
+        <label>Description<input name="reason" list="callDescriptions" required></label>
+        <label>Date of Birth<input name="date_of_birth" type="date"></label>
+        <label>Facility<input name="facility"></label>
+        <label>Appointment Time<input name="appointment_time" placeholder="3:00 PM"></label>
+        <label>Customer Person Name<input name="contact_person_name"></label>
+        <label>Contact Details<input name="phone" required></label>
+        <label>Appointment Date<input name="scheduled_date" type="date"></label>
+        <label class="profile-wide">Status<select name="outcome">
+          <option value="pending">Pending</option>
+          <option value="message1">Left message</option>
+          <option value="message2">Left message twice</option>
+          <option value="called">Done</option>
+        </select></label>
+        <label class="profile-wide">Notes<textarea name="notes" rows="4" maxlength="4000"></textarea></label>
+      </div>
+      <p id="patientMessage" role="alert" hidden></p>
+      <div class="profile-dialog-actions">
+        <button id="cancelPatient" type="button" class="ghost">Cancel</button>
+        <button type="submit">Save Changes</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="deletePatientDialog" class="profile-dialog delete-patient-dialog" aria-labelledby="deletePatientTitle" aria-describedby="deletePatientDescription">
+    <h2 id="deletePatientTitle">Delete patient?</h2>
+    <p id="deletePatientDescription">Permanently delete <strong id="deletePatientName"></strong> from the patient queue? This action cannot be undone.</p>
+    <p id="deletePatientMessage" role="alert" hidden></p>
+    <form id="deletePatientForm" class="profile-dialog-actions">
+      <button id="cancelDeletePatient" class="delete-cancel" type="button" autofocus>Cancel</button>
+      <button id="confirmDeletePatient" class="delete-confirm" type="submit">Delete patient</button>
+    </form>
+  </dialog>
+  <dialog id="profileDialog" class="profile-dialog" aria-labelledby="profileDialogTitle">
+    <header class="profile-dialog-header">
+      <h2 id="profileDialogTitle">Edit Profile</h2>
+      <button id="closeProfile" class="profile-close" type="button" aria-label="Close profile" title="Close">&times;</button>
+    </header>
+    <form id="doctorForm" class="profile-form">
+      <div class="profile-fields">
+        <label>Name<input name="name" autocomplete="name" required></label>
+        <label>Specialty<input name="specialty" required></label>
+        <label>Registration<input name="registration"></label>
+        <label>Clinic<input name="clinic" autocomplete="organization" required></label>
+        <label class="profile-wide">Address<input name="address" autocomplete="street-address" required></label>
+        <label class="profile-wide">Email<input name="email" type="email" autocomplete="email" required></label>
+      </div>
+      <p id="profileMessage" role="alert" hidden></p>
+      <div class="profile-dialog-actions">
+        <button id="cancelProfile" class="ghost" type="button">Cancel</button>
+        <button id="updateProfile" type="submit">Update Profile</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

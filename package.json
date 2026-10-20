@@ -1,0 +1,18 @@
+{
+  "name": "body-soul-doctor-portal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node node_modules/vite/bin/vite.js dist --config vite.config.js --host 127.0.0.1",
+    "build": "node node_modules/vite/bin/vite.js build dist --config vite.config.js --outDir ../build --emptyOutDir"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "jspdf": "^4.0.0",
+    "lucide": "^1.56.0",
+    "papaparse": "^5.7.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
